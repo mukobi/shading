@@ -46,22 +46,34 @@ Matrix4x4 createWorldToCameraMatrix(const Vector3D& eye, const Vector3D& at, con
 
   // TODO CS248: Camera Matrix
   // Compute the matrix that transforms a point in world space to a point in camera space.
-  Vector3D cameraForward = at - eye;
-  Vector2D forwardComponent = Vector2D(cameraForward.x, cameraForward.z).unit();
-  
-  Vector2D worldForward(0.0f, 1.0f);
-  float yRotAngle = acos(forwardComponent.x * worldForward.x + forwardComponent.y * worldForward.y);
-  Matrix4x4 rotationz = Matrix4x4::rotation(yRotAngle, Matrix4x4::Axis::Y);
+  Vector3D cameraForward = (at - eye).unit();
+  Vector3D cameraUp = up.unit();
+  Vector3D cameraRight = cross(cameraForward, Vector3D(0.0f,1.0f,0.0f)).unit();
+  Matrix4x4 rotation;
 
-  const Vector3D upUnit = up.unit();
-  Vector3D worldUp(0.0f, 1.0f, 0.0f);
-  float xRotAngle = acos(up.x * worldUp.x + up.y * worldUp.y + up.z * worldUp.z);
-  Matrix4x4 rotationx = Matrix4x4::rotation(xRotAngle, Matrix4x4::Axis::X);
+  rotation[0][0] = cameraRight.x;
+  rotation[0][1] = cameraRight.y;
+  rotation[0][2] = cameraRight.z;
+  rotation[0][3] = 0.0f;
 
-  Matrix4x4 translation = Matrix4x4::translation(-eye);
+  rotation[1][0] = cameraUp.x;
+  rotation[1][1] = cameraUp.y;
+  rotation[1][2] = cameraUp.z;
+  rotation[1][3] = 0.0f;
 
-  return rotationx * rotationz * translation;
+  rotation[2][0] = -cameraForward.x;
+  rotation[2][1] = -cameraForward.y;
+  rotation[2][2] = -cameraForward.z;
+  rotation[2][3] = 0.0f;
 
+  rotation[3][0] = 0.0f;
+  rotation[3][1] = 0.0f;
+  rotation[3][2] = 0.0f;
+  rotation[3][3] = 1.0f;
+
+  Matrix4x4 translation = Matrix4x4::translation(eye);
+
+  return (translation * rotation).inv();
 }
 
 // Creates two triangles (6 positions, 18 floats) making up a square
