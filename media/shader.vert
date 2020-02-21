@@ -28,7 +28,7 @@ void main(void)
     // TODO CS248 Normal Mapping: compute 3x3 tangent space to world space matrix here: tan2world
     //
     vec3 vtx_binormal = cross(vtx_tangent, vtx_normal);
-    mat3 tan_space_rotation = transpose(mat3(normalize(vtx_binormal), normalize(vtx_tangent), normalize(vtx_normal)));
+    mat3 tan_space_rotation = (mat3(normalize(vtx_binormal), normalize(vtx_tangent), normalize(vtx_normal)));
     tan2world = obj2worldNorm * tan_space_rotation;
     // Tips:
     //

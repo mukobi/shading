@@ -13,6 +13,7 @@ uniform bool useMirrorBRDF;         // true if mirror brdf should be used (defau
 //
 
 uniform sampler2D diffuseTextureSampler;
+uniform sampler2D normalMapSampler;
 
 
 //
@@ -142,9 +143,10 @@ void main(void)
        // lie in the range (0-1), to the range (-1,1).
        //
        // In other words:   tangent_space_normal = texture_value * 2.0 - 1.0;
-
-       // replace this line with your implementation
-       N = normalize(normal);
+       vec3 normal_texture_sample = texture(normalMapSampler, texcoord).rgb;
+       normal_texture_sample = normal_texture_sample * 2.0 - 1.0;
+       normal_texture_sample = tan2world * normal_texture_sample; // convert to world space
+       N = normalize(normal_texture_sample);
 
     } else {
        N = normalize(normal);
