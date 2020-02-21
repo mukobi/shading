@@ -46,11 +46,21 @@ Matrix4x4 createWorldToCameraMatrix(const Vector3D& eye, const Vector3D& at, con
 
   // TODO CS248: Camera Matrix
   // Compute the matrix that transforms a point in world space to a point in camera space.
+  Vector3D cameraForward = at - eye;
+  Vector2D forwardComponent = Vector2D(cameraForward.x, cameraForward.z).unit();
   
-  Matrix4x4 rotation = Matrix4x4::identity();
+  Vector2D worldForward(0.0f, 1.0f);
+  float yRotAngle = acos(forwardComponent.x * worldForward.x + forwardComponent.y * worldForward.y);
+  Matrix4x4 rotationz = Matrix4x4::rotation(yRotAngle, Matrix4x4::Axis::Y);
+
+  const Vector3D upUnit = up.unit();
+  Vector3D worldUp(0.0f, 1.0f, 0.0f);
+  float xRotAngle = acos(up.x * worldUp.x + up.y * worldUp.y + up.z * worldUp.z);
+  Matrix4x4 rotationx = Matrix4x4::rotation(xRotAngle, Matrix4x4::Axis::X);
+
   Matrix4x4 translation = Matrix4x4::translation(-eye);
 
-  return translation * rotation;
+  return rotationx * rotationz * translation;
 
 }
 
