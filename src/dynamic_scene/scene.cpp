@@ -46,8 +46,11 @@ Matrix4x4 createWorldToCameraMatrix(const Vector3D& eye, const Vector3D& at, con
 
   // TODO CS248: Camera Matrix
   // Compute the matrix that transforms a point in world space to a point in camera space.
+  
+  Matrix4x4 rotation = Matrix4x4::identity();
+  Matrix4x4 translation = Matrix4x4::translation(-eye);
 
-  return Matrix4x4::translation(Vector3D(-20,0,-150));
+  return translation * rotation;
 
 }
 
