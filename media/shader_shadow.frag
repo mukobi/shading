@@ -278,14 +278,26 @@ void main(void)
         projCoords = projCoords * 0.5 + 0.5; 
         // extract a non-homogeneous XY via the homogeneous divide
         vec2 shadow_uv = projCoords.xy;
-        // go from 
 
-        float light_shadowmap_depth = texture(shadowTextureArraySampler, vec3(shadow_uv, i)).x;
         float currentDepth = projCoords.z;
-
-        float bias = max(0.05 * (1.0 - dot(N, light_vector)), 0.005);
-
-        float shadow = currentDepth - bias > light_shadowmap_depth  ? 1.0 : 0.0;  
+        float bias = max(0.05 * (1.0 - dot(N, light_vector)), 0.005); 
+        
+        // do PCF shadow checking
+        float pcf_step_size = 512.;
+        int count_in_shadow = 0;
+        for (int j=-2; j<=2; j++) {
+            for (int k=-2; k<=2; k++) {
+                vec2 offset = vec2(j,k) / pcf_step_size;
+                // sample shadow map at shadow_uv + offset
+                float light_shadowmap_depth = texture(shadowTextureArraySampler, vec3(shadow_uv+offset, i)).x;
+                // and test if the surface is in shadow according to this sample
+                if(currentDepth - bias > light_shadowmap_depth)
+                    count_in_shadow++;
+            }
+        }
+        // record the fraction (out of 25) of shadow tests that are in shadow
+        float shadow = float(count_in_shadow) / 25.;
+        // and attenuate illumination accordingly
 
         Lo += intensity * falloff * brdf_color * inside_cone_ratio * (1. - shadow);
 //        Lo = lightSpacePositions[0].xyz;
