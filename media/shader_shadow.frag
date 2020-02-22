@@ -283,7 +283,9 @@ void main(void)
         float light_shadowmap_depth = texture(shadowTextureArraySampler, vec3(shadow_uv, i)).x;
         float currentDepth = projCoords.z;
 
-        float shadow = currentDepth > light_shadowmap_depth  ? 1.0 : 0.0;  
+        float bias = 0.005;
+
+        float shadow = currentDepth - bias > light_shadowmap_depth  ? 1.0 : 0.0;  
 
         Lo += intensity * falloff * brdf_color * inside_cone_ratio * (1. - shadow);
 //        Lo = lightSpacePositions[0].xyz;
