@@ -258,7 +258,12 @@ void Scene::renderShadowPass(int shadowedLightIndex) {
 
     Vector3D lightDir  = spotLights_[shadowedLightIndex]->direction;
     Vector3D lightPos  = spotLights_[shadowedLightIndex]->position;
-    float    coneAngle = spotLights_[shadowedLightIndex]->angle;
+    float coneAngle = spotLights_[shadowedLightIndex]->angle;
+    Vector3D lightTargetPoint = lightPos + lightDir;
+    // create light up vector orthogonal to its direction
+    Vector3D up = Vector3D(0.f, 1.f, 0.f);
+    up -= dot(up, lightDir.unit()) * lightDir.unit();
+
 
     // I'm making the fovy (field of view in y direction) of the shadow map
     // rendering a bit larger than the cone angle just to be safe. Clamp at 60 degrees.
@@ -270,9 +275,13 @@ void Scene::renderShadowPass(int shadowedLightIndex) {
     // TODO CS248: Shadow Mapping
     // Here we render the shadow map for the given light. You need to accomplish the following:
     // (1) You need to use gl_mgr_->bindFrameBuffer on the correct framebuffer to render into.
+    auto fb_bind = gl_mgr_->bindFrameBuffer(shadowFrameBufferId_[shadowedLightIndex]);
     // (2) You need to compute the correct worldToLightNDC matrix to pass into drawShadow by
     //     pretending there is a camera at the light source looking at the scene. Some fake camera
     //     parameters are provided to you in the code above.
+    Matrix4x4 worldToLight = createWorldToCameraMatrix(lightPos, lightTargetPoint, up);
+    Matrix4x4 proj = createPerspectiveMatrix(fovy, aspect, near, far);
+    Matrix4x4 worldToLightNDC = proj * worldToLight;
     // (3) You need to compute a worldToShadowLight matrix that takes the point in world space and
     //     transforms it into "light space" for the fragment shader to use to sample from the shadow map.
     //     Note that this is almost worldToLightNDC with an additional transform that converts 
@@ -291,8 +300,7 @@ void Scene::renderShadowPass(int shadowedLightIndex) {
     //       drawTriangles();  //  <- Framebuffer 100 is bound, since fb_bind is still alive here.
     // 
     // Replaces the following lines with correct implementation.
-    Matrix4x4 worldToLightNDC = Matrix4x4::identity();
-    worldToShadowLight_[shadowedLightIndex].zero();
+    worldToShadowLight_[shadowedLightIndex] = worldToLightNDC;
 
     glViewport(0, 0, shadowTextureSize_, shadowTextureSize_);
 

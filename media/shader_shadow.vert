@@ -10,6 +10,8 @@ uniform mat4 mvp;                       // ModelViewProjection Matrix
 
 uniform bool useNormalMapping;         // true if normal mapping should be used
 
+uniform mat4 spot_light_world_to_light[MAX_NUM_LIGHTS];
+
 // per vertex input attributes 
 in vec3 vtx_position;            // object space position
 in vec3 vtx_tangent;
@@ -24,6 +26,8 @@ out vec2 texcoord;
 out vec3 dir2camera;                // world space vector from surface point to camera
 out vec3 normal;
 out mat3 tan2world;                 // tangent space rotation matrix multiplied by obj2WorldNorm
+
+out vec4 lightSpacePositions[MAX_NUM_LIGHTS];
 
 void main(void)
 {
@@ -40,7 +44,11 @@ void main(void)
     //
     // Recall for shadow mapping we need to know the position of the surface relative
     // to each shadowed light source.
-
+    for (int i = 0; i < num_spot_lights; ++i) {
+        vec4 homegenous_world_space = obj2world * vec4(vtx_position, 1);
+        vec4 lightSpace = spot_light_world_to_light[i] * homegenous_world_space;
+        lightSpacePositions[i] = lightSpace;
+    }
 
     // TODO CS248 Normal Mapping: compute 3x3 tangent space to world space matrix here: tan2world
     //

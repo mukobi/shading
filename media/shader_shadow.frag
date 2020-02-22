@@ -15,6 +15,7 @@ uniform bool useMirrorBRDF;         // true if mirror brdf should be used (defau
 uniform sampler2D diffuseTextureSampler;
 uniform sampler2D normalTextureSampler;
 uniform sampler2D environmentTextureSampler;
+uniform sampler2DArray shadowTextureArraySampler;
 
 
 //
@@ -51,6 +52,8 @@ in vec2 texcoord;     // surface texcoord (uv)
 in vec3 dir2camera;   // vector from surface point to camera
 in mat3 tan2world;    // tangent space to world space transform
 in vec3 vertex_diffuse_color; // surface color
+
+in vec4 lightSpacePositions[MAX_NUM_LIGHTS];
 
 out vec4 fragColor;
 
@@ -255,13 +258,6 @@ void main(void)
         //       facing out area.  Smaller values of SMOOTHING will create hard spotlights.
 
         // CS248: remove this once you perform proper attenuation computations
-//        intensity = vec3(0.5, 0.5, 0.5);
-
-
-        // Render Shadows for all spot lights
-        // CS248 TODO: Shadow Mapping: comute shadowing for spotlight i here 
-
-        
         vec3 L = normalize(light_vector);
 		vec3 brdf_color = Phong_BRDF(L, V, N, diffuseColor, specularColor, specularExponent);
 
@@ -273,7 +269,24 @@ void main(void)
             inside_cone_ratio = clamp((cone_angle * 1.1 - angle) / (0.2 * cone_angle), 0, 1);
         }
 
-        Lo += intensity * falloff * brdf_color * inside_cone_ratio;
+
+        // Render Shadows for all spot lights
+        // CS248 TODO: Shadow Mapping: copmute shadowing for spotlight i here
+
+        vec4 position_shadowlight = lightSpacePositions[i];
+        vec3 projCoords = position_shadowlight.xyz / position_shadowlight.w;
+        projCoords = projCoords * 0.5 + 0.5; 
+        // extract a non-homogeneous XY via the homogeneous divide
+        vec2 shadow_uv = projCoords.xy;
+        // go from 
+
+        float light_shadowmap_depth = texture(shadowTextureArraySampler, vec3(shadow_uv, i)).x;
+        float currentDepth = projCoords.z;
+
+        float shadow = currentDepth > light_shadowmap_depth  ? 1.0 : 0.0;  
+
+        Lo += intensity * falloff * brdf_color * inside_cone_ratio * (1. - shadow);
+//        Lo = lightSpacePositions[0].xyz;
     }
 
     fragColor = vec4(Lo, 1);
