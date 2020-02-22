@@ -283,7 +283,7 @@ void main(void)
         float light_shadowmap_depth = texture(shadowTextureArraySampler, vec3(shadow_uv, i)).x;
         float currentDepth = projCoords.z;
 
-        float bias = 0.005;
+        float bias = max(0.05 * (1.0 - dot(N, light_vector)), 0.005);
 
         float shadow = currentDepth - bias > light_shadowmap_depth  ? 1.0 : 0.0;  
 
