@@ -264,14 +264,13 @@ void main(void)
         
         vec3 L = normalize(light_vector);
 		vec3 brdf_color = Phong_BRDF(L, V, N, diffuseColor, specularColor, specularExponent);
-//        brdf_color = vec3(0.);
 
         float distance = length(dir_to_surface);
         float falloff = 1.0 / (0.01 + distance * distance);
 
-        float inside_cone_ratio = 1.;
-        if(angle > cone_angle) {
-            inside_cone_ratio = 0.;
+        float inside_cone_ratio = 0.;
+        if(angle < cone_angle * 1.1) {
+            inside_cone_ratio = clamp((cone_angle * 1.1 - angle) / (0.2 * cone_angle), 0, 1);
         }
 
         Lo += intensity * falloff * brdf_color * inside_cone_ratio;
