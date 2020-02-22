@@ -1,0 +1,25 @@
+Gabriel Mukobi - gmukobi@
+
+Tasks completed:
+
+Everything required. I.e.:
+* Part 1: Coordinate transform
+* Part 2: Implementing Phong Reflectance
+* Part 3: Normal mapping
+* Part 4: Adding Environment Lighting
+* Part 5: Adding Spotlights and Shadows
+
+Alterations:
+In part 5.2 where mesh.ccp is to "pass an array of matrices to 
+the shader to go from object space to the "light space" for each 
+spot light," I couldn't figure out how to make a matrix going from
+the [-w, w]^3 space to [0, 1]^3 space, so I instead followed the
+method on learnopengl.com's shadow mapping tutorial where I sent
+the WORLD space to light space matrices then converted the object
+space vtx_position to world space then used that passed in matrix
+to convert it to light space in the vertex shader. Maybe the
+performance differs, but the end data conversion is the same so
+the rendered image looks the same.
+
+Extra credit:
+nah
